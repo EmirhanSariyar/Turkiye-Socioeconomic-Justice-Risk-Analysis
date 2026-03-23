@@ -140,17 +140,25 @@ When benchmark artifacts are available, the dashboard can switch between saved m
 
 ![Dashboard Overview](reports/figures/dashboard-overview.png)
 
+The main dashboard view combines province filters, model-aware summary cards, justice activity signals, and socio-economic context into a single operational overview. This section is designed to provide a fast province-level read before moving into deeper map, ranking, or benchmark analysis.
+
 ### Province Risk Map
 
 ![Province Risk Map](reports/figures/province-risk-map.png)
+
+The province risk map visualizes the currently selected model overlay at the national level. It enables quick spatial comparison across provinces and helps surface regional concentration patterns in predicted justice-risk intensity.
 
 ### Ranking and Coverage
 
 ![Ranking and Coverage](reports/figures/ranking-and-coverage.png)
 
+The ranking and coverage section highlights how provinces compare within the selected year while also exposing the breadth of the modeling base. This supports both relative benchmarking and transparency around the dataset coverage behind the dashboard.
+
 ### Model Benchmark View
 
 ![Model Benchmark View](reports/figures/Model-benchmark-view.png)
+
+The benchmark view is intended for model comparison rather than only presentation. It allows users to inspect how Logistic Regression, Random Forest, and XGBoost perform across variants, making the analytical workflow more defensible and easier to explain in portfolio or review settings.
 
 ## Project Structure
 
@@ -252,13 +260,6 @@ Generated modeling artifacts include:
 - The strongest province-level justice target currently ends at `2021`.
 - Some richer socio-economic indicators are only available for narrower year ranges.
 - Post-2021 views are currently positioned as monitoring layers rather than unified justice-label outputs.
-
-## Future Work
-
-- add hyperparameter tuning on top of the current benchmark baselines
-- expand model interpretation and province-level explainability
-- improve dashboard storytelling and comparison workflows
-- extend the modeling layer as new harmonized justice data becomes available
 
 ## License
 
