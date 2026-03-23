@@ -379,43 +379,43 @@ recent_meb_df["year"] = pd.to_numeric(recent_meb_df["year"], errors="coerce")
 recent_sgk_df = recent_sgk_df.sort_values("year")
 recent_meb_df = recent_meb_df.sort_values("year")
 
-col1, col2, col3, col4 = st.columns(4)
-col1.metric(
+metric_row1_col1, metric_row1_col2, metric_row1_col3, metric_row1_col4 = st.columns([1, 1, 1, 1])
+metric_row1_col1.metric(
     "Investigation Files Opened",
     format_number(selected_row["investigation_files_opened"]) if selected_row is not None else "N/A",
 )
-col2.metric(
+metric_row1_col2.metric(
     "Active Insured Total",
     format_number(selected_row["active_insured_total"]) if selected_row is not None else "N/A",
 )
-col3.metric(
+metric_row1_col3.metric(
     "Migration Direction",
     describe_migration(selected_row["net_migration"]) if selected_row is not None else "N/A",
 )
-col4.metric(
+metric_row1_col4.metric(
     "Selected Model Risk" if selected_model_name else "Risk Label",
     selected_row["dashboard_risk_label"]
     if selected_row is not None and pd.notna(selected_row["dashboard_risk_label"])
     else "N/A",
 )
 
-col5, col6, col7 = st.columns(3)
-col5.metric(
+metric_row2_col1, metric_row2_col2, metric_row2_col3, metric_row2_spacer1 = st.columns([1, 1, 1, 1])
+metric_row2_col1.metric(
+    "Predicted High-Risk Probability",
+    format_percent(selected_row["predicted_probability"] * 100, 1)
+    if selected_row is not None and pd.notna(selected_row["predicted_probability"])
+    else "N/A",
+)
+metric_row2_col2.metric(
     "General Secondary Gross Enrollment",
     format_percent(selected_row["general_secondary_gross_enrollment_rate"])
     if selected_row is not None
     else "N/A",
 )
-col6.metric(
+metric_row2_col3.metric(
     "Vocational Secondary Gross Enrollment",
     format_percent(selected_row["vocational_secondary_gross_enrollment_rate"])
     if selected_row is not None
-    else "N/A",
-)
-col7.metric(
-    "Predicted High-Risk Probability",
-    format_percent(selected_row["predicted_probability"] * 100, 1)
-    if selected_row is not None and pd.notna(selected_row["predicted_probability"])
     else "N/A",
 )
 
