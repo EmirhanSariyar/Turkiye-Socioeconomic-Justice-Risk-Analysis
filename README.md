@@ -116,6 +116,10 @@ Generated benchmark artifacts include:
 
 This benchmark structure makes it possible to compare simple linear baselines against tree-based models while keeping the dashboard aligned with safer, non-in-sample probability outputs.
 
+![Model Benchmark View](reports/figures/Model-benchmark-view.png)
+
+The benchmark view is intended for model comparison rather than only presentation. It allows users to inspect how Logistic Regression, Random Forest, and XGBoost perform across variants, making the analytical workflow more defensible and easier to explain in portfolio or review settings.
+
 ## Dashboard
 
 The Streamlit dashboard is designed as an analytical interface rather than a static report.
@@ -134,8 +138,6 @@ It currently supports:
 
 When benchmark artifacts are available, the dashboard can switch between saved model overlays. In that mode, the displayed risk labels, ranking table, probability cards, and map coloring are driven by saved **out-of-fold** model predictions rather than in-sample fitted probabilities.
 
-## Dashboard Preview
-
 ### Dashboard Overview
 
 ![Dashboard Overview](reports/figures/dashboard-overview.png)
@@ -153,12 +155,6 @@ The province risk map visualizes the currently selected model overlay at the nat
 ![Ranking and Coverage](reports/figures/ranking-and-coverage.png)
 
 The ranking and coverage section highlights how provinces compare within the selected year while also exposing the breadth of the modeling base. This supports both relative benchmarking and transparency around the dataset coverage behind the dashboard.
-
-### Model Benchmark View
-
-![Model Benchmark View](reports/figures/Model-benchmark-view.png)
-
-The benchmark view is intended for model comparison rather than only presentation. It allows users to inspect how Logistic Regression, Random Forest, and XGBoost perform across variants, making the analytical workflow more defensible and easier to explain in portfolio or review settings.
 
 ## Project Structure
 
