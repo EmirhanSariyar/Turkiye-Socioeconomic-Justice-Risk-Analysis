@@ -1,43 +1,40 @@
-# Turkiye Socioeconomic Justice Risk Analysis
+# Turkiye Socio-Economic Justice Risk Analysis
 
-Province-level socio-economic analysis and justice-risk modeling project for Turkiye, built with official public datasets and an interactive Streamlit dashboard.
+Province-level socio-economic analysis and justice-risk modeling project for Turkiye, built with official public datasets, multi-model machine learning benchmarks, and an interactive Streamlit dashboard.
 
 ## Overview
 
-This project studies how province-level socio-economic indicators relate to recorded justice-file intensity in Turkiye.
+This project examines how province-level socio-economic indicators relate to recorded justice-file intensity across Turkiye.
 
-The system combines:
+The system brings together:
 
 - provincial justice investigation statistics
 - SGK active insured counts
-- migration indicators
-- education indicators from both TURKSTAT and MEB
-- an interactive dashboard for province and year comparisons
+- internal migration indicators
+- province-level education indicators from TURKSTAT and MEB
+- model benchmarking with Logistic Regression, Random Forest, and XGBoost
+- an interactive dashboard for province, year, and model comparison
 
 The project does **not** claim to measure absolute crime truth directly.  
-Its main target is a **justice proxy** based on recorded investigation-file volume.
+Its analytical target is a **justice proxy** derived from recorded investigation-file activity.
 
-## Problem Definition
+## Objective
 
-The core modeling question is:
+The central analytical question is:
 
 > Can province-level socio-economic indicators help explain or classify recorded justice-file intensity across Turkish provinces?
 
-In the current implementation, the strongest province-level target is:
+To answer that question, the repository constructs province-year datasets, engineers socio-economic features, benchmarks multiple classification models, and exposes the results through a decision-support style dashboard.
 
-- `investigation_files_opened`
+## Data Scope
 
-This target comes from provincial chief public prosecutor statistics and is used to derive yearly `Low / Medium / High` justice-risk bands.
-
-## Dataset Summary
-
-The harmonized baseline modeling window is:
+The harmonized core modeling window is:
 
 - `2011-2021`
 
-This window was selected because it is the cleanest province-level overlap across the main justice and socio-economic sources.
+This period was selected because it provides the cleanest overlap between justice and socio-economic sources at the province-year level.
 
-### Main Sources
+### Primary Data Sources
 
 - `Justice`: provincial investigation-file statistics, `2011-2021`
 - `SGK`: active insured totals, `2009-2024`
@@ -45,7 +42,7 @@ This window was selected because it is the cleanest province-level overlap acros
 - `TURKSTAT education`: attainment-style indicators for recent years
 - `MEB education`: province-level gross enrollment ratios for upper secondary education, `2011-2025`
 
-### Current Feature Groups
+### Core Feature Groups
 
 - `active_insured_total`
 - `population`
@@ -56,102 +53,88 @@ This window was selected because it is the cleanest province-level overlap acros
 - `university_rate`
 - region-based categorical indicators
 
-### Important Interpretation Note
+### Interpretation Note
 
 MEB education variables in this repository are **gross enrollment rates**, not attainment rates.
 
-That means:
+This means:
 
 - values may exceed `100`
-- they should be interpreted as enrollment intensity / participation proxies
-- they should not be interpreted as direct graduation or attainment levels
+- they should be interpreted as participation or enrollment-intensity proxies
+- they should not be interpreted as direct graduation or attainment outcomes
 
-## Modeling Approach
+## Modeling Strategy
 
-The repository currently includes two baseline model variants:
+The repository currently benchmarks two complementary modeling variants:
 
 ### 1. Rich Feature Rate Model
 
 - narrower overlap
-- richer socio-economic feature set
-- useful for detailed cross-sectional analysis
+- richer socio-economic feature space
+- suited to detailed but lower-coverage analysis
 
 ### 2. Wide Coverage Flow Model
 
 - broader temporal coverage
-- stronger support across `2011-2021`
-- currently the most stable baseline for wide province-year analysis
-
-The `Wide Coverage Flow Model` is the stronger general-purpose baseline at the moment because it retains much broader data support.
+- stronger province-year support across `2011-2021`
+- currently the stronger general-purpose baseline for broad monitoring
 
 ## Methods
 
 The project currently uses the following data science and machine learning methods:
 
-- province-year panel data construction from multi-source public datasets
-- data cleaning, province-name normalization, and schema harmonization
-- feature engineering for migration, employment, population, and education indicators
-- proxy-target modeling using recorded justice investigation intensity
-- binary classification and yearly risk-band generation
-- benchmark-based baseline modeling with logistic regression, random forest, and XGBoost
-- missing-value imputation for numeric and categorical variables
-- feature scaling for numeric variables
-- one-hot encoding for categorical regional variables
-- train/test split evaluation
-- stratified cross-validation for model stability checks
-- benchmark result export to CSV and JSON for reproducibility
-- interactive visual analytics through a Streamlit dashboard
+- province-year panel construction from multiple public sources
+- province-name normalization and schema harmonization
+- feature engineering for justice, migration, employment, population, and education variables
+- proxy-target modeling using recorded investigation-file intensity
+- binary classification based on yearly relative justice-flow thresholds
+- benchmark modeling with `Logistic Regression`, `Random Forest`, and `XGBoost`
+- numeric and categorical missing-value imputation
+- feature scaling for linear models
+- one-hot encoding for regional categorical variables
+- stratified train/test evaluation
+- stratified cross-validation for stability checks
+- out-of-fold prediction export for dashboard-safe probability display
 
 ## Model Benchmarking
 
-`src/train.py` now benchmarks multiple classifiers for both modeling variants:
+`src/train.py` benchmarks multiple classifiers for both modeling variants and exports reproducible evaluation artifacts.
 
-- `Logistic Regression`
-- `Random Forest`
-- `XGBoost` if the optional dependency is installed successfully
-
-For each variant, the training script performs:
+For each model variant, the training pipeline performs:
 
 - a stratified train/test split
 - stratified cross-validation with up to `5` folds
-- test-set reporting for accuracy, balanced accuracy, precision, recall, F1, and ROC-AUC
-- confusion matrix and detailed classification report export
-- out-of-fold prediction export for safer dashboard probability display
+- reporting for accuracy, balanced accuracy, precision, recall, F1, and ROC-AUC
+- confusion matrix and detailed classification output generation
+- out-of-fold prediction generation for dashboard overlays
 
-The current benchmark outputs are written to:
+Generated benchmark artifacts include:
 
 - `models/benchmark_summary.csv`
 - `models/benchmark_results.json`
 - `models/model_predictions.csv`
 
-This makes it easier to compare whether the simpler linear baseline or the tree-based models generalize better for each province-year target definition.
+This benchmark structure makes it possible to compare simple linear baselines against tree-based models while keeping the dashboard aligned with safer, non-in-sample probability outputs.
 
 ## Dashboard
 
-The Streamlit dashboard includes:
+The Streamlit dashboard is designed as an analytical interface rather than a static report.
 
-- province and year selection
-- benchmarked model selection for comparison
-- variant selection for switching between saved model overlays
-- justice-risk metrics for the selected province
-- province-level trend charts
-- choropleth map of Turkish provinces
-- province ranking for the selected year
-- a recent monitoring view for post-2021 SGK and MEB trends
-- a model benchmark view for comparing test and cross-validation performance
+It currently supports:
 
-When benchmark artifacts are available, the dashboard can also switch its displayed risk overlay using the selected model and modeling variant. In that mode, map colors, displayed risk labels, probability cards, and the yearly province ranking are driven by saved out-of-fold model predictions rather than in-sample fitted probabilities.
+- province and year filtering
+- benchmark model selection
+- modeling variant selection
+- province-level justice and socio-economic summary cards
+- province trend analysis
+- choropleth-based provincial risk visualization
+- ranked province comparison for the selected year
+- recent post-2021 monitoring views
+- a dedicated model benchmark comparison view
 
-The dashboard is intentionally split into two views:
-
-- `Main Risk View (2011-2021)`
-- `Recent Trends View (2011-2025)`
-
-This keeps the main methodology clean while still exposing newer education and employment trends.
+When benchmark artifacts are available, the dashboard can switch between saved model overlays. In that mode, the displayed risk labels, ranking table, probability cards, and map coloring are driven by saved **out-of-fold** model predictions rather than in-sample fitted probabilities.
 
 ## Dashboard Preview
-
-The current dashboard provides province-level justice-risk monitoring, socio-economic trend analysis, and comparative provincial views.
 
 ### Dashboard Overview
 
@@ -164,6 +147,10 @@ The current dashboard provides province-level justice-risk monitoring, socio-eco
 ### Ranking and Coverage
 
 ![Ranking and Coverage](reports/figures/ranking-and-coverage.png)
+
+### Model Benchmark View
+
+![Model Benchmark View](reports/figures/Model-benchmark-view.png)
 
 ## Project Structure
 
@@ -184,6 +171,7 @@ The current dashboard provides province-level justice-risk monitoring, socio-eco
 |-- models/
 |-- notebooks/
 |-- reports/
+|   `-- figures/
 |-- src/
 |   |-- config.py
 |   |-- merge_master_data.py
@@ -193,7 +181,7 @@ The current dashboard provides province-level justice-risk monitoring, socio-eco
 `-- tests/
 ```
 
-## How To Run
+## Getting Started
 
 Create and activate a virtual environment:
 
@@ -218,19 +206,19 @@ Train the benchmark models:
 python src/train.py
 ```
 
-If `XGBoost` is not available in your environment yet, install dependencies again after updating `requirements.txt`:
-
-```bash
-pip install -r requirements.txt
-```
-
 Run the dashboard:
 
 ```bash
 streamlit run app.py
 ```
 
-## Current Outputs
+If `XGBoost` is not yet available in the environment, reinstall the dependencies after updating `requirements.txt`:
+
+```bash
+pip install -r requirements.txt
+```
+
+## Outputs
 
 Generated raw datasets include:
 
@@ -245,32 +233,33 @@ Generated processed datasets include:
 - `data/processed/province_year_master_2011_2021.csv`
 - `data/processed/province_year_modeling_2011_2021.csv`
 
-Generated model benchmark outputs include:
+Generated modeling artifacts include:
 
 - `models/benchmark_summary.csv`
 - `models/benchmark_results.json`
 - `models/model_predictions.csv`
 
+## Validation Notes
+
+- Cross-validation is stratified to preserve class balance across folds.
+- The rich-feature model has a much smaller sample size than the wide-coverage model and should be interpreted more cautiously.
+- Tree-based models may capture non-linear province-level patterns more effectively, but they should be assessed together with cross-validation stability rather than a single test split alone.
+- Dashboard probabilities are intentionally based on out-of-fold predictions to avoid overly optimistic in-sample confidence.
+
 ## Limitations
 
 - The project uses a **justice proxy**, not direct crime truth.
 - The strongest province-level justice target currently ends at `2021`.
-- Some richer socio-economic features are only available for narrower year ranges.
-- Newer post-2021 trends are currently presented as monitoring views rather than unified justice-risk labels.
+- Some richer socio-economic indicators are only available for narrower year ranges.
+- Post-2021 views are currently positioned as monitoring layers rather than unified justice-label outputs.
 
-## Validation Notes
-
-- Cross-validation is currently stratified to preserve class balance across folds.
-- The rich-feature model has a much smaller sample size than the wide-coverage model, so cross-validation is especially important there.
-- Tree-based models may fit non-linear province-level patterns better, but their gains should be interpreted together with cross-validation stability, not only a single test split.
-
-## Future Improvements
+## Future Work
 
 - add hyperparameter tuning on top of the current benchmark baselines
-- refine model interpretation and province-level explainability
-- revisit smoother map interactivity in the final frontend polish stage
-- remove temporary internal planning files before final public release
+- expand model interpretation and province-level explainability
+- improve dashboard storytelling and comparison workflows
+- extend the modeling layer as new harmonized justice data becomes available
 
 ## License
 
-This project includes an MIT license file in the repository.
+This repository is released under the MIT License.
