@@ -93,23 +93,54 @@ The project currently uses the following data science and machine learning metho
 - feature engineering for migration, employment, population, and education indicators
 - proxy-target modeling using recorded justice investigation intensity
 - binary classification and yearly risk-band generation
-- logistic regression baseline modeling
+- benchmark-based baseline modeling with logistic regression, random forest, and XGBoost
 - missing-value imputation for numeric and categorical variables
 - feature scaling for numeric variables
 - one-hot encoding for categorical regional variables
 - train/test split evaluation
+- stratified cross-validation for model stability checks
+- benchmark result export to CSV and JSON for reproducibility
 - interactive visual analytics through a Streamlit dashboard
+
+## Model Benchmarking
+
+`src/train.py` now benchmarks multiple classifiers for both modeling variants:
+
+- `Logistic Regression`
+- `Random Forest`
+- `XGBoost` if the optional dependency is installed successfully
+
+For each variant, the training script performs:
+
+- a stratified train/test split
+- stratified cross-validation with up to `5` folds
+- test-set reporting for accuracy, balanced accuracy, precision, recall, F1, and ROC-AUC
+- confusion matrix and detailed classification report export
+- out-of-fold prediction export for safer dashboard probability display
+
+The current benchmark outputs are written to:
+
+- `models/benchmark_summary.csv`
+- `models/benchmark_results.json`
+- `models/model_predictions.csv`
+
+This makes it easier to compare whether the simpler linear baseline or the tree-based models generalize better for each province-year target definition.
 
 ## Dashboard
 
 The Streamlit dashboard includes:
 
 - province and year selection
+- benchmarked model selection for comparison
+- variant selection for switching between saved model overlays
 - justice-risk metrics for the selected province
 - province-level trend charts
 - choropleth map of Turkish provinces
 - province ranking for the selected year
 - a recent monitoring view for post-2021 SGK and MEB trends
+- a model benchmark view for comparing test and cross-validation performance
+
+When benchmark artifacts are available, the dashboard can also switch its displayed risk overlay using the selected model and modeling variant. In that mode, map colors, displayed risk labels, probability cards, and the yearly province ranking are driven by saved out-of-fold model predictions rather than in-sample fitted probabilities.
 
 The dashboard is intentionally split into two views:
 
@@ -181,10 +212,16 @@ python src/prepare_raw_data.py
 python src/merge_master_data.py
 ```
 
-Train the baseline models:
+Train the benchmark models:
 
 ```bash
 python src/train.py
+```
+
+If `XGBoost` is not available in your environment yet, install dependencies again after updating `requirements.txt`:
+
+```bash
+pip install -r requirements.txt
 ```
 
 Run the dashboard:
@@ -208,6 +245,12 @@ Generated processed datasets include:
 - `data/processed/province_year_master_2011_2021.csv`
 - `data/processed/province_year_modeling_2011_2021.csv`
 
+Generated model benchmark outputs include:
+
+- `models/benchmark_summary.csv`
+- `models/benchmark_results.json`
+- `models/model_predictions.csv`
+
 ## Limitations
 
 - The project uses a **justice proxy**, not direct crime truth.
@@ -215,11 +258,17 @@ Generated processed datasets include:
 - Some richer socio-economic features are only available for narrower year ranges.
 - Newer post-2021 trends are currently presented as monitoring views rather than unified justice-risk labels.
 
+## Validation Notes
+
+- Cross-validation is currently stratified to preserve class balance across folds.
+- The rich-feature model has a much smaller sample size than the wide-coverage model, so cross-validation is especially important there.
+- Tree-based models may fit non-linear province-level patterns better, but their gains should be interpreted together with cross-validation stability, not only a single test split.
+
 ## Future Improvements
 
-- refine evaluation outputs and model interpretation
+- add hyperparameter tuning on top of the current benchmark baselines
+- refine model interpretation and province-level explainability
 - revisit smoother map interactivity in the final frontend polish stage
-- add stronger explainability around province-level risk differences
 - remove temporary internal planning files before final public release
 
 ## License
