@@ -33,3 +33,10 @@ def test_get_cv_splits_caps_at_smallest_class_size():
 def test_get_cv_splits_never_drops_below_two():
     y = pd.Series([0, 1])
     assert get_cv_splits(y, max_splits=5) == 2
+
+
+def test_get_cv_splits_caps_at_group_count():
+    y = pd.Series([0, 0, 0, 1, 1, 1, 1])
+    groups = pd.Series(["a", "a", "b", "b", "c", "c", "c"])
+
+    assert get_cv_splits(y, groups=groups, max_splits=5) == 3

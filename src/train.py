@@ -15,7 +15,7 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
 )
-from sklearn.model_selection import StratifiedKFold, cross_val_predict, cross_validate, train_test_split
+from sklearn.model_selection import StratifiedGroupKFold, cross_val_predict, cross_validate
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
@@ -105,9 +105,17 @@ def build_scoring() -> dict[str, object]:
     }
 
 
-def get_cv_splits(y: pd.Series, max_splits: int = 5) -> int:
+def get_cv_splits(y: pd.Series, groups: pd.Series | None = None, max_splits: int = 5) -> int:
     min_class_count = int(y.value_counts().min())
+    if groups is not None:
+        return max(2, min(max_splits, min_class_count, groups.nunique()))
     return max(2, min(max_splits, min_class_count))
+
+
+def get_group_labels(modeling_df: pd.DataFrame) -> pd.Series:
+    if "province_key" in modeling_df.columns:
+        return modeling_df["province_key"].astype(str)
+    return modeling_df["province"].astype(str)
 
 
 def save_benchmark_results(results: list[dict]) -> None:
@@ -131,6 +139,7 @@ def save_benchmark_results(results: list[dict]) -> None:
                     "rows_used": variant["rows_used"],
                     "feature_count": len(variant["features_used"]),
                     "cv_folds": variant["cv_folds"],
+                    "evaluation_strategy": variant["evaluation_strategy"],
                     "test_accuracy": test_metrics["accuracy"],
                     "test_balanced_accuracy": test_metrics["balanced_accuracy"],
                     "test_precision": test_metrics["precision"],
@@ -164,6 +173,7 @@ def print_variant_summary(variant_result: dict) -> None:
     print(f"Rows used: {variant_result['rows_used']}")
     print(f"Features used: {', '.join(variant_result['features_used'])}")
     print(f"Cross-validation folds: {variant_result['cv_folds']}")
+    print(f"Evaluation strategy: {variant_result['evaluation_strategy']}")
 
     for skipped in variant_result["skipped_models"]:
         print(f"- Skipped {skipped['model_name']}: {skipped['reason']}")
@@ -224,17 +234,24 @@ def train_variant(
     if y.nunique() < 2:
         raise ValueError(f"Variant '{title}' needs at least two target classes.")
 
-    stratify_target = y if y.value_counts().min() >= 2 else None
-
-    x_train, x_test, y_train, y_test = train_test_split(
-        x,
-        y,
-        test_size=0.25,
+    groups = get_group_labels(modeling_df)
+    cv_splits = get_cv_splits(y, groups)
+    cv_strategy = StratifiedGroupKFold(
+        n_splits=cv_splits,
+        shuffle=True,
         random_state=RANDOM_STATE,
-        stratify=stratify_target,
     )
-    cv_splits = get_cv_splits(y)
-    cv_strategy = StratifiedKFold(n_splits=cv_splits, shuffle=True, random_state=RANDOM_STATE)
+    holdout_splits = get_cv_splits(y, groups, max_splits=4)
+    holdout_strategy = StratifiedGroupKFold(
+        n_splits=holdout_splits,
+        shuffle=True,
+        random_state=RANDOM_STATE,
+    )
+    train_index, test_index = next(holdout_strategy.split(x, y, groups=groups))
+    x_train = x.iloc[train_index]
+    x_test = x.iloc[test_index]
+    y_train = y.iloc[train_index]
+    y_test = y.iloc[test_index]
     scoring = build_scoring()
     model_candidates, skipped_models = build_model_candidates()
 
@@ -253,6 +270,7 @@ def train_variant(
             x,
             y,
             cv=cv_strategy,
+            groups=groups,
             scoring=scoring,
             n_jobs=1,
         )
@@ -267,6 +285,7 @@ def train_variant(
             x,
             y,
             cv=cv_strategy,
+            groups=groups,
             method="predict",
             n_jobs=1,
         )
@@ -276,6 +295,7 @@ def train_variant(
                 x,
                 y,
                 cv=cv_strategy,
+                groups=groups,
                 method="predict_proba",
                 n_jobs=1,
             )[:, 1]
@@ -323,6 +343,7 @@ def train_variant(
         "rows_used": len(modeling_df),
         "features_used": feature_columns,
         "cv_folds": cv_splits,
+        "evaluation_strategy": "stratified_group_by_province",
         "model_results": model_results,
         "prediction_rows": prediction_rows,
         "skipped_models": skipped_models,

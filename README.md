@@ -256,6 +256,7 @@ Local rebuilds may also produce additional raw, interim, or external files. Thos
 ## Validation Notes
 
 - Cross-validation is stratified to preserve class balance across folds.
+- Model validation uses province-grouped splits so the same province does not appear in both train and validation folds.
 - The rich-feature model has a much smaller sample size than the wide-coverage model and should be interpreted more cautiously.
 - Tree-based models may capture non-linear province-level patterns more effectively, but they should be assessed together with cross-validation stability rather than a single test split alone.
 - Dashboard probabilities are intentionally based on out-of-fold predictions to avoid overly optimistic in-sample confidence.
