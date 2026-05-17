@@ -197,7 +197,15 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-Build the raw and processed datasets:
+Run the dashboard with the included runtime artifacts:
+
+```bash
+streamlit run app.py
+```
+
+The repository includes the compact processed datasets, map file, and benchmark artifacts needed to open the dashboard after cloning.
+
+Rebuild the raw and processed datasets when you want to regenerate the pipeline outputs:
 
 ```bash
 python src/prepare_raw_data.py
@@ -208,12 +216,6 @@ Train the benchmark models:
 
 ```bash
 python src/train.py
-```
-
-Run the dashboard:
-
-```bash
-streamlit run app.py
 ```
 
 If `XGBoost` is not yet available in the environment, reinstall the dependencies after updating `requirements.txt`:
