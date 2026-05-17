@@ -394,7 +394,6 @@ def train_baseline_models() -> list[dict]:
 
     wide_df = build_wide_coverage_dataset()
     wide_numeric_features = [
-        "year",
         "active_insured_total",
         "general_secondary_gross_enrollment_rate",
         "vocational_secondary_gross_enrollment_rate",
