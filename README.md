@@ -63,6 +63,12 @@ This means:
 - they should be interpreted as participation or enrollment-intensity proxies
 - they should not be interpreted as direct graduation or attainment outcomes
 
+### Data Governance
+
+The repository includes only the compact, aggregated runtime artifacts required to reproduce the dashboard experience after cloning. These files are province-year level public indicators and model outputs; they do not contain individual-level records or personally identifiable information.
+
+Larger source files and local exploratory data dumps are intentionally excluded through `.gitignore`. When extending the project, raw source archives should be regenerated from the documented public sources or handled outside the repository unless redistribution terms are explicitly clear.
+
 ## Modeling Strategy
 
 The repository currently benchmarks two complementary modeling variants:
@@ -226,7 +232,7 @@ pip install -r requirements.txt
 
 ## Outputs
 
-Generated raw datasets include:
+Included runtime datasets include:
 
 - `data/raw/justice_provincial_2011_2021.csv`
 - `data/raw/sgk_active_insured_2009_2024.csv`
@@ -245,6 +251,8 @@ Generated modeling artifacts include:
 - `models/benchmark_results.json`
 - `models/model_predictions.csv`
 
+Local rebuilds may also produce additional raw, interim, or external files. Those larger working files are excluded from version control by default.
+
 ## Validation Notes
 
 - Cross-validation is stratified to preserve class balance across folds.
@@ -255,6 +263,7 @@ Generated modeling artifacts include:
 ## Limitations
 
 - The project uses a **justice proxy**, not direct crime truth.
+- Included datasets are aggregated public indicators, but source-specific redistribution terms should still be reviewed before adding new raw data files.
 - The strongest province-level justice target currently ends at `2021`.
 - Some richer socio-economic indicators are only available for narrower year ranges.
 - Post-2021 views are currently positioned as monitoring layers rather than unified justice-label outputs.
